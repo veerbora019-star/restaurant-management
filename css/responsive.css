@@ -1,0 +1,174 @@
+/* ==========================================================================
+   SPICE GARDEN POS & DIGITAL ORDERING SYSTEM — RESPONSIVE & PRINT CSS
+   ========================================================================== */
+
+/* Tablet & Smaller Desktops (< 1024px) */
+@media (max-width: 1024px) {
+  :root {
+    --header-height: 62px;
+  }
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+  .kds-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* Tablets (< 768px) */
+@media (max-width: 768px) {
+  .hero-banner {
+    padding: 16px 14px;
+  }
+  .restaurant-quick-meta {
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+  .meta-chip {
+    padding: 4px 8px;
+  }
+  .search-filter-wrapper {
+    flex-direction: column;
+  }
+  .menu-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .card-media-wrapper {
+    height: 140px;
+  }
+  .kpi-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .table-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Slide-over cart takes full screen on tablet/mobile */
+  .cart-drawer {
+    max-width: 100%;
+  }
+
+  /* Bottom sticky bar */
+  .mobile-cart-bar {
+    display: flex;
+  }
+  
+  /* Space out main content so bottom sticky bar doesn't obstruct */
+  #customerMenuView {
+    padding-bottom: 80px;
+  }
+}
+
+/* Mobile Handsets (< 480px) */
+@media (max-width: 480px) {
+  .demo-role-bar {
+    padding: 6px 10px;
+    font-size: 0.72rem;
+  }
+  .role-pill {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+  .header-inner {
+    padding: 8px 12px;
+  }
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+  }
+  .brand-tagline {
+    font-size: 0.65rem;
+  }
+  .nav-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+  
+  .menu-cards-grid {
+    grid-template-columns: 1fr; /* Single column on compact phones for full readable card */
+  }
+  
+  .kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .order-tracker-timeline {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .step-label {
+    font-size: 0.68rem;
+  }
+  
+  .modal-dialog {
+    max-height: 95vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-top: auto;
+    margin-bottom: 0;
+  }
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  
+  .toast-container {
+    left: 12px;
+    right: 12px;
+    top: 12px;
+  }
+  .toast-message {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   PRINT STYLESHEET (POS Thermal & A4 Invoice)
+   ========================================================================== */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .demo-role-bar,
+  .app-header,
+  .hero-banner,
+  .category-nav-bar,
+  .filter-tags-bar,
+  .cart-drawer-backdrop,
+  .cart-drawer,
+  .mobile-cart-bar,
+  .toast-container,
+  .no-print,
+  button:not(.allow-print) {
+    display: none !important;
+  }
+  
+  .app-view {
+    display: none !important;
+  }
+  #printInvoiceView {
+    display: block !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .invoice-container {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 10px !important;
+  }
+}
