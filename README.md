@@ -1,5 +1,7 @@
 # 🌿 Spice Garden — Commercial Multi-Tenant Restaurant Management Platform
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fveerbora019-star%2Frestaurant-management)
+
 > **A production-ready, multi-tenant restaurant digital ordering system, Kitchen Display System (KDS), Table Floor POS, and Admin Management Platform with PostgreSQL & Supabase Database Architecture, Row Level Security (RLS), and Realtime Order Synchronization.**
 
 ---
