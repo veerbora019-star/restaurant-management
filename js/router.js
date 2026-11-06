@@ -145,7 +145,9 @@ const AppRouter = {
     const target = document.getElementById(viewId);
     if (target) {
       target.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   },
 

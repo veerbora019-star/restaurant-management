@@ -280,12 +280,42 @@ class StateManager {
     // In-memory relational mirrors (hydrated asynchronously from PostgreSQL engine)
     this.restaurants = SEED_DATA_RESTAURANTS;
     this.settings = SEED_DATA_SETTINGS[0];
-    this.menu = SEED_DATA_MENU;
+    this.menu = this.normalizeMenuItems(SEED_DATA_MENU);
     this.categories = SEED_DATA_CATEGORIES;
     this.tables = SEED_DATA_TABLES;
     this.orders = SEED_DATA_ORDERS;
     this.coupons = SEED_DATA_COUPONS;
     this.staff = SEED_DATA_PROFILES;
+  }
+
+  normalizeMenuItems(list = []) {
+    return (list || []).map(item => {
+      const cat = item.category_id || item.cat || 'mains';
+      const desc = item.description || item.desc || '';
+      const image = item.image_url || item.image || '';
+      const isBestseller = item.bestseller !== undefined ? item.bestseller : (item.isBestseller || false);
+      const spiceLevel = item.spice_level !== undefined ? item.spice_level : (item.spiceLevel || 0);
+      const prepTime = item.preparation_time || item.prepTime || '15 min';
+      const resId = item.restaurant_id || item.restaurantId || 'res_spice_garden';
+
+      return {
+        ...item,
+        cat,
+        category_id: cat,
+        desc,
+        description: desc,
+        image,
+        image_url: image,
+        isBestseller,
+        bestseller: isBestseller,
+        spiceLevel,
+        spice_level: spiceLevel,
+        prepTime,
+        preparation_time: prepTime,
+        restaurantId: resId,
+        restaurant_id: resId
+      };
+    });
   }
 
   async init() {
@@ -323,7 +353,8 @@ class StateManager {
     if (res) {
       this.restaurants = await dbEngine.selectRestaurants();
     }
-    this.menu = await RestaurantAPI.getMenu(this.activeRestaurantId);
+    const rawMenu = await RestaurantAPI.getMenu(this.activeRestaurantId);
+    this.menu = this.normalizeMenuItems(rawMenu && rawMenu.length ? rawMenu : SEED_DATA_MENU);
     this.categories = await RestaurantAPI.getCategories(this.activeRestaurantId);
     this.tables = await RestaurantAPI.getTables(this.activeRestaurantId);
     this.orders = await RestaurantAPI.getRestaurantOrders(this.activeRestaurantId);
@@ -341,7 +372,8 @@ class StateManager {
   }
 
   async refreshMenu() {
-    this.menu = await RestaurantAPI.getMenu(this.activeRestaurantId);
+    const rawMenu = await RestaurantAPI.getMenu(this.activeRestaurantId);
+    this.menu = this.normalizeMenuItems(rawMenu && rawMenu.length ? rawMenu : SEED_DATA_MENU);
     this.emit('menu:updated', this.menu);
   }
 
@@ -426,9 +458,9 @@ class StateManager {
   }
 
   async saveMenu(updatedMenu) {
-    this.menu = updatedMenu;
+    this.menu = this.normalizeMenuItems(updatedMenu);
     if (typeof dbEngine !== 'undefined') {
-      dbEngine.tables.menu_items = JSON.parse(JSON.stringify(updatedMenu));
+      dbEngine.tables.menu_items = JSON.parse(JSON.stringify(this.menu));
     }
     this.emit('menu:updated', this.menu);
   }

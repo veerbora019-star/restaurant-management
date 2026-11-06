@@ -4,8 +4,17 @@
  */
 
 const App = {
-  init() {
+  async init() {
     console.log('[Spice Garden SaaS Platform] Bootstrapping unified commercial application...');
+
+    // 0. Initialize Backend Database Engine & State
+    if (typeof appState !== 'undefined' && appState.init) {
+      try {
+        await appState.init();
+      } catch (err) {
+        console.warn('[App Init] State engine hydration warning:', err);
+      }
+    }
 
     // 1. Initialize Theme & Branding
     this.applyTheme(appState.theme);

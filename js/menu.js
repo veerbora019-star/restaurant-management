@@ -98,15 +98,15 @@ const MenuModule = {
 
     // 1. Category Filter
     if (this.currentCat !== 'all') {
-      items = items.filter(i => i.cat === this.currentCat);
+      items = items.filter(i => (i.category_id || i.cat) === this.currentCat);
     }
 
     // 2. Search Query (Name, Description, Ingredients)
     if (this.searchQuery) {
       const q = this.searchQuery;
       items = items.filter(i => {
-        const nameMatch = i.name.toLowerCase().includes(q);
-        const descMatch = (i.desc || '').toLowerCase().includes(q);
+        const nameMatch = (i.name || '').toLowerCase().includes(q);
+        const descMatch = (i.description || i.desc || '').toLowerCase().includes(q);
         const ingMatch = Array.isArray(i.ingredients) && i.ingredients.some(ing => ing.toLowerCase().includes(q));
         return nameMatch || descMatch || ingMatch;
       });
@@ -120,13 +120,13 @@ const MenuModule = {
       items = items.filter(i => i.dietary === 'vegan');
     }
     if (this.activeFilters.spicyOnly) {
-      items = items.filter(i => (i.spiceLevel || 0) >= 2);
+      items = items.filter(i => ((i.spice_level !== undefined ? i.spice_level : (i.spiceLevel || 0)) >= 2));
     }
     if (this.activeFilters.bestsellerOnly) {
-      items = items.filter(i => i.isBestseller);
+      items = items.filter(i => (i.bestseller || i.isBestseller));
     }
     if (this.activeFilters.availableOnly) {
-      items = items.filter(i => i.available);
+      items = items.filter(i => i.available !== false);
     }
 
     return items;
@@ -157,8 +157,9 @@ const MenuModule = {
     appState.categories.forEach(cat => { grouped[cat.id] = []; });
 
     filteredItems.forEach(item => {
-      if (!grouped[item.cat]) grouped[item.cat] = [];
-      grouped[item.cat].push(item);
+      const catKey = item.category_id || item.cat;
+      if (!grouped[catKey]) grouped[catKey] = [];
+      grouped[catKey].push(item);
     });
 
     let html = '';
@@ -189,21 +190,26 @@ const MenuModule = {
 
   renderCardHTML(item) {
     const qtyInCart = CartModule.getItemQuantity(item.id);
-    const spiceIcons = '🌶️'.repeat(item.spiceLevel || 0);
+    const spice = item.spice_level !== undefined ? item.spice_level : (item.spiceLevel || 0);
+    const spiceIcons = '🌶️'.repeat(spice);
+    const isBestseller = item.bestseller || item.isBestseller;
+    const prepTime = item.preparation_time || item.prepTime;
+    const imgUrl = item.image_url || item.image;
+    const descText = item.description || item.desc || 'Prepared freshly with authentic house spices.';
 
     return `
-      <div class="food-card ${item.available ? '' : 'unavailable'}" data-item-id="${item.id}">
+      <div class="food-card ${item.available !== false ? '' : 'unavailable'}" data-item-id="${item.id}">
         <!-- Media / Image -->
         <div class="card-media-wrapper" onclick="MenuModule.openItemDetailModal(${item.id})">
-          ${item.isBestseller ? `
+          ${isBestseller ? `
             <div class="badge-ribbon">⭐ Bestseller</div>
           ` : ''}
-          ${item.prepTime ? `
-            <div class="badge-prep-time">⏱️ ${item.prepTime}</div>
+          ${prepTime ? `
+            <div class="badge-prep-time">⏱️ ${prepTime}</div>
           ` : ''}
           
-          ${item.image ? `
-            <img class="card-img" src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
+          ${imgUrl ? `
+            <img class="card-img" src="${imgUrl}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"/>
             <div class="card-placeholder-art" style="display: none;">${item.emoji || '🍲'}</div>
           ` : `
             <div class="card-placeholder-art">${item.emoji || '🍲'}</div>
@@ -219,10 +225,10 @@ const MenuModule = {
             <div class="diet-indicator ${item.dietary || 'veg'}" title="${item.dietary === 'vegan' ? 'Vegan' : 'Pure Veg'}"></div>
           </div>
 
-          <p class="dish-desc">${item.desc || 'Prepared freshly with authentic house spices.'}</p>
+          <p class="dish-desc">${descText}</p>
 
           <div class="card-meta-chips">
-            ${item.spiceLevel > 0 ? `<span class="spice-rating" title="Spiciness: ${item.spiceLevel}/3">${spiceIcons}</span>` : ''}
+            ${spice > 0 ? `<span class="spice-rating" title="Spiciness: ${spice}/3">${spiceIcons}</span>` : ''}
             ${item.calories ? `<span class="text-muted">${item.calories}</span>` : ''}
           </div>
 
@@ -234,7 +240,7 @@ const MenuModule = {
             </div>
 
             <div class="action-container">
-              ${!item.available ? `
+              ${item.available === false ? `
                 <span class="unavail-label" style="font-size: 0.8rem; color: var(--danger); font-weight: 700;">Sold Out</span>
               ` : (
                 qtyInCart === 0 ? `
@@ -267,12 +273,16 @@ const MenuModule = {
     if (!modalEl || !contentEl) return;
 
     const qtyInCart = CartModule.getItemQuantity(item.id) || 1;
-    const spiceIcons = item.spiceLevel > 0 ? '🌶️'.repeat(item.spiceLevel) : 'Mild';
+    const spiceVal = item.spice_level !== undefined ? item.spice_level : (item.spiceLevel || 0);
+    const spiceIcons = spiceVal > 0 ? '🌶️'.repeat(spiceVal) : 'Mild';
+    const imgUrl = item.image_url || item.image;
+    const prepTime = item.preparation_time || item.prepTime;
+    const descText = item.description || item.desc || 'Cooked with premium ingredients and seasoned to perfection.';
 
     contentEl.innerHTML = `
       <div class="detail-modal-media">
-        ${item.image ? `
-          <img src="${item.image}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80'"/>
+        ${imgUrl ? `
+          <img src="${imgUrl}" alt="${item.name}" onerror="this.src='https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80'"/>
         ` : `
           <div class="card-placeholder-art">${item.emoji || '🍲'}</div>
         `}
@@ -286,7 +296,7 @@ const MenuModule = {
           <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px; font-size: 0.85rem; color: var(--text-muted);">
             <span class="diet-indicator ${item.dietary || 'veg'}"></span>
             <span>${item.dietary === 'vegan' ? '100% Vegan' : '100% Pure Vegetarian'}</span>
-            ${item.prepTime ? `<span>&bull; ⏱️ ${item.prepTime}</span>` : ''}
+            ${prepTime ? `<span>&bull; ⏱️ ${prepTime}</span>` : ''}
             ${item.calories ? `<span>&bull; 🔥 ${item.calories}</span>` : ''}
           </div>
         </div>
@@ -296,13 +306,13 @@ const MenuModule = {
       </div>
 
       <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5;">
-        ${item.desc || 'Cooked with premium ingredients and seasoned to perfection.'}
+        ${descText}
       </p>
 
       <div style="background: var(--bg-subtle); padding: 12px 16px; border-radius: var(--radius-md); font-size: 0.85rem; display: flex; flex-direction: column; gap: 6px;">
         <div style="display: flex; justify-content: space-between;">
           <span style="font-weight: 600; color: var(--text-muted);">Spice Rating:</span>
-          <span>${spiceIcons} (${item.spiceLevel || 0}/3)</span>
+          <span>${spiceIcons} (${spiceVal}/3)</span>
         </div>
         ${Array.isArray(item.ingredients) && item.ingredients.length > 0 ? `
           <div style="display: flex; justify-content: space-between;">

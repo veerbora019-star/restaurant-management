@@ -247,26 +247,26 @@ const AdminModule = {
     if (!tbody) return;
 
     const res = appState.getCurrentRestaurant();
-    const menu = appState.menu.filter(m => !m.restaurantId || m.restaurantId === res.id);
+    const menu = appState.menu.filter(m => (m.restaurant_id ? m.restaurant_id === res.id : (!m.restaurantId || m.restaurantId === res.id)));
 
     tbody.innerHTML = menu.map(item => `
       <tr>
         <td>
           <div style="display: flex; align-items: center; gap: 10px;">
-            ${item.image ? `
-              <img src="${item.image}" alt="${item.name}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;" onerror="this.style.display='none'"/>
+            ${(item.image_url || item.image) ? `
+              <img src="${item.image_url || item.image}" alt="${item.name}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;" onerror="this.style.display='none'"/>
             ` : `
               <span style="font-size: 1.5rem;">${item.emoji || '🍲'}</span>
             `}
             <div>
               <div style="font-weight: 700; color: var(--text-main);">${item.name}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">${item.desc ? item.desc.substring(0, 45) + '...' : ''}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${(item.description || item.desc) ? (item.description || item.desc).substring(0, 45) + '...' : ''}</div>
             </div>
           </div>
         </td>
         <td>
           <span class="meta-chip" style="text-transform: capitalize; font-size: 0.75rem;">
-            ${item.cat}
+            ${item.cat || item.category_id}
           </span>
         </td>
         <td>
