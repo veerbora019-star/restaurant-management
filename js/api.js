@@ -80,7 +80,8 @@ const RestaurantAPI = {
     if (!table) throw new Error('Table not found');
 
     const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost:8080';
-    const qrUrl = `${origin}/#order?res=${restaurantId}&table=${table.table_number}`;
+    const pathname = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '/';
+    const qrUrl = `${origin}${pathname}#order?res=${restaurantId}&table=${table.table_number}`;
     return {
       table,
       url: qrUrl,
